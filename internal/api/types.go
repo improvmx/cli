@@ -88,3 +88,12 @@ type AccountPlan struct {
 	Name    string `json:"name"`
 	Price   int    `json:"price"`
 }
+
+type Rule struct {
+	ID      string                 `json:"id"`
+	Type    string                 `json:"type"`
+	Config  map[string]interface{} `json:"config"`
+	Rank    float64                `json:"rank"`
+	Active  bool                   `json:"active"`
+	Created int64                  `json:"created"`
+}
