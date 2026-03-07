@@ -1,6 +1,6 @@
 # ImprovMX CLI
 
-Manage your [ImprovMX](https://improvmx.com) email forwarding directly from the terminal. Add domains, create aliases, manage SMTP credentials, view logs, and more.
+Manage your [ImprovMX](https://improvmx.com) email forwarding directly from the terminal. Add domains, create aliases, manage SMTP credentials, view logs, and more. Perfect for interacting with ImprovMX from Claude Code, OpenAI Codex, or OpenClaw!
 
 ## Installation
 
