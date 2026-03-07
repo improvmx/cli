@@ -58,6 +58,19 @@ improvmx alias delete example.com hello               # Delete an alias
 improvmx logs example.com             # View recent email logs
 ```
 
+### Rules
+
+```bash
+improvmx rule list example.com                                                                        # List rules
+improvmx rule get example.com <rule-id>                                                               # Get rule details
+improvmx rule add example.com --type alias --alias hello --forward user@gmail.com                     # Add alias rule
+improvmx rule add example.com --type regex --regex ".*invoice.*" --scopes subject,body --forward user@gmail.com  # Add regex rule
+improvmx rule add example.com --type cel --expression "subject.contains('finance')" --forward user@gmail.com     # Add CEL rule
+improvmx rule update example.com <rule-id> --forward new@gmail.com                                    # Update a rule
+improvmx rule delete example.com <rule-id>                                                            # Delete a rule
+improvmx rule delete-all example.com                                                                  # Delete all rules
+```
+
 ### SMTP Credentials
 
 ```bash
