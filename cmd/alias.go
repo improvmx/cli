@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/improvmx/cli/internal/api"
 	"github.com/improvmx/cli/internal/config"
@@ -25,7 +26,15 @@ var aliasListCmd = &cobra.Command{
 		client := api.NewClient(config.GetAPIKey())
 		domain := args[0]
 
-		resp, err := client.Get("/domains/" + domain + "/aliases")
+		params := map[string]string{}
+		if page, _ := cmd.Flags().GetInt("page"); page > 0 {
+			params["page"] = strconv.Itoa(page)
+		}
+		if limit, _ := cmd.Flags().GetInt("limit"); limit > 0 {
+			params["limit"] = strconv.Itoa(limit)
+		}
+
+		resp, err := client.Get("/domains/" + domain + "/aliases" + api.QueryEncode(params))
 		if err != nil {
 			output.Error(err.Error())
 			os.Exit(1)
@@ -152,4 +161,7 @@ func init() {
 	aliasCmd.AddCommand(aliasAddCmd)
 	aliasCmd.AddCommand(aliasUpdateCmd)
 	aliasCmd.AddCommand(aliasDeleteCmd)
+
+	aliasListCmd.Flags().Int("page", 0, "Page number")
+	aliasListCmd.Flags().Int("limit", 0, "Results per page")
 }

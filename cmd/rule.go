@@ -93,15 +93,11 @@ var ruleGetCmd = &cobra.Command{
 			return
 		}
 
-		var result struct {
-			Rule api.Rule `json:"rule"`
-		}
-		if err := parseResponse(resp, &result); err != nil {
+		var r api.Rule
+		if err := parseResponse(resp, &r); err != nil {
 			output.Error(err.Error())
 			os.Exit(1)
 		}
-
-		r := result.Rule
 		active := "no"
 		if r.Active {
 			active = "yes"

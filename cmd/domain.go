@@ -30,6 +30,12 @@ var domainListCmd = &cobra.Command{
 		if isActive, _ := cmd.Flags().GetBool("active"); isActive {
 			params["is_active"] = "1"
 		}
+		if page, _ := cmd.Flags().GetInt("page"); page > 0 {
+			params["page"] = strconv.Itoa(page)
+		}
+		if limit, _ := cmd.Flags().GetInt("limit"); limit > 0 {
+			params["limit"] = strconv.Itoa(limit)
+		}
 
 		resp, err := client.Get("/domains" + api.QueryEncode(params))
 		if err != nil {
@@ -233,6 +239,8 @@ func init() {
 	domainCmd.AddCommand(domainCheckCmd)
 
 	domainListCmd.Flags().Bool("active", false, "Only show active domains")
+	domainListCmd.Flags().Int("page", 0, "Page number")
+	domainListCmd.Flags().Int("limit", 0, "Results per page")
 	domainAddCmd.Flags().String("notification-email", "", "Notification email address")
 	domainAddCmd.Flags().String("whitelabel", "", "Whitelabel domain")
 }
