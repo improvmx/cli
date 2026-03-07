@@ -52,7 +52,7 @@ var smtpListCmd = &cobra.Command{
 
 		table := output.NewTable("USERNAME", "USAGE", "CREATED")
 		for _, c := range result.Credentials {
-			created := time.Unix(c.Created, 0).Format("2006-01-02")
+			created := time.Unix(c.Created/1000, 0).Format("2006-01-02")
 			table.AddRow(c.Username, strconv.Itoa(c.Usage), created)
 		}
 		table.Render()

@@ -45,7 +45,7 @@ var logsCmd = &cobra.Command{
 
 		table := output.NewTable("TIME", "FROM", "TO", "SUBJECT", "STATUS")
 		for _, l := range result.Logs {
-			t := time.Unix(l.Created, 0).Format("Jan 02 15:04")
+			t := time.Unix(l.Created/1000, 0).Format("Jan 02 15:04")
 			status := "pending"
 			if len(l.Events) > 0 {
 				last := l.Events[len(l.Events)-1]

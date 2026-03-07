@@ -61,7 +61,7 @@ var domainListCmd = &cobra.Command{
 			if d.Active {
 				active = "yes"
 			}
-			added := time.Unix(d.Added, 0).Format("2006-01-02")
+			added := time.Unix(d.Added/1000, 0).Format("2006-01-02")
 			table.AddRow(d.Name, active, strconv.Itoa(len(d.Aliases)), added)
 		}
 		table.Render()
@@ -104,7 +104,7 @@ var domainGetCmd = &cobra.Command{
 		fmt.Printf("Active:       %s\n", active)
 		fmt.Printf("Notification: %s\n", d.NotificationEmail)
 		fmt.Printf("Whitelabel:   %s\n", d.Whitelabel)
-		fmt.Printf("Added:        %s\n", time.Unix(d.Added, 0).Format("2006-01-02 15:04:05"))
+		fmt.Printf("Added:        %s\n", time.Unix(d.Added/1000, 0).Format("2006-01-02 15:04:05"))
 
 		if len(d.Aliases) > 0 {
 			fmt.Printf("\nAliases (%d):\n", len(d.Aliases))
