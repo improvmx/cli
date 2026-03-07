@@ -22,11 +22,12 @@ var authLoginCmd = &cobra.Command{
 	Short: "Authenticate with your ImprovMX API key",
 	Long: `Authenticate with your ImprovMX API key.
 
-You can find your API key at https://improvmx.com/dashboard/#/account`,
+You can find your API key at https://app.improvmx.com/api`,
 	Run: func(cmd *cobra.Command, args []string) {
 		apiKey, _ := cmd.Flags().GetString("api-key")
 
 		if apiKey == "" {
+			fmt.Println("Get your API key from https://app.improvmx.com/api")
 			fmt.Print("Enter your API key: ")
 			reader := bufio.NewReader(os.Stdin)
 			input, err := reader.ReadString('\n')
