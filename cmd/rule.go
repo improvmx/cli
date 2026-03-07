@@ -67,7 +67,7 @@ var ruleListCmd = &cobra.Command{
 			if r.Active {
 				active = "yes"
 			}
-			created := time.Unix(r.Created/1000, 0).Format("2006-01-02")
+			created := time.Unix(r.Created, 0).Format("2006-01-02")
 			table.AddRow(shortID(r.ID), r.Type, active, fmt.Sprintf("%.1f", r.Rank), formatConfig(r), created)
 		}
 		table.Render()
@@ -110,7 +110,7 @@ var ruleGetCmd = &cobra.Command{
 		fmt.Printf("Type:    %s\n", r.Type)
 		fmt.Printf("Active:  %s\n", active)
 		fmt.Printf("Rank:    %.1f\n", r.Rank)
-		fmt.Printf("Created: %s\n", time.Unix(r.Created/1000, 0).Format("2006-01-02 15:04:05"))
+		fmt.Printf("Created: %s\n", time.Unix(r.Created, 0).Format("2006-01-02 15:04:05"))
 		fmt.Printf("Config:\n")
 
 		configJSON, _ := json.MarshalIndent(r.Config, "  ", "  ")
