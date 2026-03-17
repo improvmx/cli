@@ -68,7 +68,7 @@ var ruleListCmd = &cobra.Command{
 				active = "yes"
 			}
 			created := time.Unix(r.Created, 0).Format("2006-01-02")
-			table.AddRow(shortID(r.ID), r.Type, active, fmt.Sprintf("%.1f", r.Rank), formatConfig(r), created)
+			table.AddRow(r.ID, r.Type, active, fmt.Sprintf("%.1f", r.Rank), formatConfig(r), created)
 		}
 		table.Render()
 	},
@@ -203,7 +203,12 @@ CEL rule (use CEL expressions):
 			return
 		}
 
-		output.Success(fmt.Sprintf("Rule (%s) added to %s", ruleType, domain))
+		var rule api.Rule
+		if err := json.Unmarshal(resp, &rule); err == nil && rule.ID != "" {
+			output.Success(fmt.Sprintf("Rule %s (%s) added to %s", rule.ID, ruleType, domain))
+		} else {
+			output.Success(fmt.Sprintf("Rule (%s) added to %s", ruleType, domain))
+		}
 	},
 }
 
@@ -263,7 +268,7 @@ var ruleUpdateCmd = &cobra.Command{
 			return
 		}
 
-		output.Success(fmt.Sprintf("Rule %s updated", shortID(ruleID)))
+		output.Success(fmt.Sprintf("Rule %s updated", ruleID))
 	},
 }
 
@@ -282,7 +287,7 @@ var ruleDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output.Success(fmt.Sprintf("Rule %s deleted", shortID(ruleID)))
+		output.Success(fmt.Sprintf("Rule %s deleted", ruleID))
 	},
 }
 

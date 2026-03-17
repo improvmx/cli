@@ -184,7 +184,7 @@ var domainGetCmd = &cobra.Command{
 						rActive = "yes"
 					}
 					created := time.Unix(r.Created, 0).Format("2006-01-02")
-					table.AddRow(shortID(r.ID), r.Type, rActive, fmt.Sprintf("%.1f", r.Rank), formatConfig(r), created)
+					table.AddRow(r.ID, r.Type, rActive, fmt.Sprintf("%.1f", r.Rank), formatConfig(r), created)
 				}
 				table.Render()
 			}
