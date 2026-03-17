@@ -120,6 +120,139 @@ Credentials are stored at:
 - **macOS**: `~/Library/Application Support/improvmx/config.yaml`
 - **Linux**: `~/.config/improvmx/config.yaml`
 
+## Building
+
+Requires [Go 1.23+](https://go.dev/dl/).
+
+### Build for current platform
+
+```bash
+go build -o improvmx .
+```
+
+### Cross-compile for all platforms
+
+```bash
+GOOS=darwin  GOARCH=arm64 go build -o dist/improvmx-darwin-arm64 .
+GOOS=darwin  GOARCH=amd64 go build -o dist/improvmx-darwin-amd64 .
+GOOS=linux   GOARCH=amd64 go build -o dist/improvmx-linux-amd64 .
+GOOS=linux   GOARCH=arm64 go build -o dist/improvmx-linux-arm64 .
+GOOS=windows GOARCH=amd64 go build -o dist/improvmx-windows-amd64.exe .
+```
+
+## Signing & Notarization (macOS)
+
+To distribute the macOS binaries without Gatekeeper warnings, you need to sign and notarize them with an Apple Developer ID.
+
+### Prerequisites
+
+- An [Apple Developer Program](https://developer.apple.com/programs/enroll/) membership (Organization, requires a DUNS number)
+- A **Developer ID Application** certificate — create one at [Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources/certificates/list):
+  - Choose **Developer ID Application**
+  - Select **G2 Sub-CA (Xcode 11.4.1 or later)** as the intermediary
+  - Generate a CSR via **Keychain Access → Certificate Assistant → Request a Certificate From a Certificate Authority** (save to disk)
+  - Upload the CSR and download the resulting `.cer` file
+  - Double-click the `.cer` file to install it into your Keychain
+- An **app-specific password** from [Apple ID account](https://appleid.apple.com/account/manage) (Sign-In and Security → App-Specific Passwords)
+
+### Verify your certificate
+
+```bash
+security find-identity -v
+```
+
+You should see something like:
+
+```
+1) XXXXXXXX "Developer ID Application: ImprovMX Incorporated (2TMRXZB6JT)"
+```
+
+### Sign the binaries
+
+```bash
+codesign --sign "Developer ID Application: ImprovMX Incorporated (2TMRXZB6JT)" \
+  --options runtime \
+  --timestamp \
+  dist/improvmx-darwin-arm64
+
+codesign --sign "Developer ID Application: ImprovMX Incorporated (2TMRXZB6JT)" \
+  --options runtime \
+  --timestamp \
+  dist/improvmx-darwin-amd64
+```
+
+### Verify signatures
+
+```bash
+codesign --verify --verbose dist/improvmx-darwin-arm64
+codesign --verify --verbose dist/improvmx-darwin-amd64
+```
+
+### Store notarization credentials
+
+Store your credentials in the Keychain to avoid passing them on the command line:
+
+```bash
+xcrun notarytool store-credentials "improvmx" \
+  --apple-id "YOUR_APPLE_ID" \
+  --team-id "2TMRXZB6JT" \
+  --password "YOUR_APP_SPECIFIC_PASSWORD"
+```
+
+### Notarize the binaries
+
+```bash
+# Zip the binaries
+ditto -c -k --keepParent dist/improvmx-darwin-arm64 dist/improvmx-darwin-arm64.zip
+ditto -c -k --keepParent dist/improvmx-darwin-amd64 dist/improvmx-darwin-amd64.zip
+
+# Submit for notarization
+xcrun notarytool submit dist/improvmx-darwin-arm64.zip \
+  --keychain-profile "improvmx" \
+  --wait
+
+xcrun notarytool submit dist/improvmx-darwin-amd64.zip \
+  --keychain-profile "improvmx" \
+  --wait
+```
+
+Notarization typically takes under 5 minutes. If a submission gets stuck, check [Apple's system status](https://developer.apple.com/system-status/) and resubmit.
+
+### Check notarization status
+
+```bash
+# List all submissions
+xcrun notarytool history --keychain-profile "improvmx"
+
+# Get details for a specific submission
+xcrun notarytool info SUBMISSION_ID --keychain-profile "improvmx"
+
+# View the log if rejected
+xcrun notarytool log SUBMISSION_ID --keychain-profile "improvmx"
+```
+
+## Releasing
+
+After building, signing, and notarizing, create a GitHub release:
+
+```bash
+# Tag the release
+git tag v0.2.0
+git push origin v0.2.0
+
+# Create the release with all binaries
+gh release create v0.2.0 \
+  dist/improvmx-darwin-arm64 \
+  dist/improvmx-darwin-amd64 \
+  dist/improvmx-linux-amd64 \
+  dist/improvmx-linux-arm64 \
+  dist/improvmx-windows-amd64.exe \
+  --title "v0.2.0" \
+  --notes "Release notes here"
+```
+
+Make sure to upload the **signed and notarized** macOS binaries, not the unsigned ones.
+
 ## License
 
 MIT
