@@ -162,7 +162,33 @@ var domainGetCmd = &cobra.Command{
 		fmt.Printf("Whitelabel:   %s\n", d.Whitelabel)
 		fmt.Printf("Added:        %s\n", time.Unix(d.Added/1000, 0).Format("2006-01-02 15:04:05"))
 
-		if len(d.Aliases) > 0 {
+		if routing == "rules" {
+			rulesResp, err := client.Get("/domains/" + domain + "/rules")
+			if err != nil {
+				output.Error(err.Error())
+				os.Exit(1)
+			}
+			var rr struct {
+				Rules []api.Rule `json:"rules"`
+			}
+			if err := json.Unmarshal(rulesResp, &rr); err != nil {
+				output.Error(err.Error())
+				os.Exit(1)
+			}
+			if len(rr.Rules) > 0 {
+				fmt.Printf("\nRules (%d):\n", len(rr.Rules))
+				table := output.NewTable("ID", "TYPE", "ACTIVE", "RANK", "CONFIG", "CREATED")
+				for _, r := range rr.Rules {
+					rActive := "no"
+					if r.Active {
+						rActive = "yes"
+					}
+					created := time.Unix(r.Created, 0).Format("2006-01-02")
+					table.AddRow(shortID(r.ID), r.Type, rActive, fmt.Sprintf("%.1f", r.Rank), formatConfig(r), created)
+				}
+				table.Render()
+			}
+		} else if len(d.Aliases) > 0 {
 			fmt.Printf("\nAliases (%d):\n", len(d.Aliases))
 			table := output.NewTable("ALIAS", "FORWARDS TO")
 			for _, a := range d.Aliases {
