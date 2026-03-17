@@ -8,6 +8,7 @@ type Domain struct {
 	Whitelabel    string   `json:"whitelabel"`
 	Added         int64    `json:"added"`
 	Aliases       []Alias  `json:"aliases,omitempty"`
+	RoutingEngine string   `json:"routing_engine"`
 }
 
 type Alias struct {

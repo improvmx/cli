@@ -61,14 +61,59 @@ var domainListCmd = &cobra.Command{
 			return
 		}
 
-		table := output.NewTable("DOMAIN", "ACTIVE", "ALIASES", "ADDED")
+		// Fetch rule counts for rules-based domains in parallel
+		type ruleCount struct {
+			domain string
+			count  int
+		}
+		ruleCounts := make(map[string]int)
+		ch := make(chan ruleCount, len(result.Domains))
+		pending := 0
+		for _, d := range result.Domains {
+			routing := d.RoutingEngine
+			if routing == "" {
+				routing = "alias"
+			}
+			if routing == "rules" {
+				pending++
+				go func(name string) {
+					resp, err := client.Get("/domains/" + name + "/rules")
+					if err != nil {
+						ch <- ruleCount{name, 0}
+						return
+					}
+					var rr struct {
+						Rules []api.Rule `json:"rules"`
+					}
+					if err := json.Unmarshal(resp, &rr); err != nil {
+						ch <- ruleCount{name, 0}
+						return
+					}
+					ch <- ruleCount{name, len(rr.Rules)}
+				}(d.Name)
+			}
+		}
+		for range pending {
+			rc := <-ch
+			ruleCounts[rc.domain] = rc.count
+		}
+
+		table := output.NewTable("DOMAIN", "ACTIVE", "ROUTING", "ROUTES", "ADDED")
 		for _, d := range result.Domains {
 			active := "no"
 			if d.Active {
 				active = "yes"
 			}
+			routing := d.RoutingEngine
+			if routing == "" {
+				routing = "alias"
+			}
+			routes := strconv.Itoa(len(d.Aliases))
+			if routing == "rules" {
+				routes = strconv.Itoa(ruleCounts[d.Name])
+			}
 			added := time.Unix(d.Added/1000, 0).Format("2006-01-02")
-			table.AddRow(d.Name, active, strconv.Itoa(len(d.Aliases)), added)
+			table.AddRow(d.Name, active, routing, routes, added)
 		}
 		table.Render()
 	},
@@ -106,8 +151,13 @@ var domainGetCmd = &cobra.Command{
 		if d.Active {
 			active = "yes"
 		}
+		routing := d.RoutingEngine
+		if routing == "" {
+			routing = "alias"
+		}
 		fmt.Printf("Domain:       %s\n", d.Name)
 		fmt.Printf("Active:       %s\n", active)
+		fmt.Printf("Routing:      %s\n", routing)
 		fmt.Printf("Notification: %s\n", d.NotificationEmail)
 		fmt.Printf("Whitelabel:   %s\n", d.Whitelabel)
 		fmt.Printf("Added:        %s\n", time.Unix(d.Added/1000, 0).Format("2006-01-02 15:04:05"))
