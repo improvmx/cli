@@ -11,6 +11,9 @@ import (
 
 const BaseURL = "https://api.improvmx.com/v3"
 
+// Endpoints move to v4 one at a time, so both versions are live on the same host.
+const BaseURLV4 = "https://api.improvmx.com/v4"
+
 type Client struct {
 	APIKey     string
 	HTTPClient *http.Client
@@ -23,7 +26,7 @@ func NewClient(apiKey string) *Client {
 	}
 }
 
-func (c *Client) doRequest(method, path string, body interface{}) ([]byte, error) {
+func (c *Client) doRequest(method, reqURL string, body interface{}) ([]byte, error) {
 	var reqBody io.Reader
 	if body != nil {
 		data, err := json.Marshal(body)
@@ -33,7 +36,6 @@ func (c *Client) doRequest(method, path string, body interface{}) ([]byte, error
 		reqBody = strings.NewReader(string(data))
 	}
 
-	reqURL := BaseURL + path
 	req, err := http.NewRequest(method, reqURL, reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -71,19 +73,23 @@ func (c *Client) doRequest(method, path string, body interface{}) ([]byte, error
 }
 
 func (c *Client) Get(path string) ([]byte, error) {
-	return c.doRequest(http.MethodGet, path, nil)
+	return c.doRequest(http.MethodGet, BaseURL+path, nil)
 }
 
 func (c *Client) Post(path string, body interface{}) ([]byte, error) {
-	return c.doRequest(http.MethodPost, path, body)
+	return c.doRequest(http.MethodPost, BaseURL+path, body)
+}
+
+func (c *Client) PostV4(path string, body interface{}) ([]byte, error) {
+	return c.doRequest(http.MethodPost, BaseURLV4+path, body)
 }
 
 func (c *Client) Put(path string, body interface{}) ([]byte, error) {
-	return c.doRequest(http.MethodPut, path, body)
+	return c.doRequest(http.MethodPut, BaseURL+path, body)
 }
 
 func (c *Client) Delete(path string) ([]byte, error) {
-	return c.doRequest(http.MethodDelete, path, nil)
+	return c.doRequest(http.MethodDelete, BaseURL+path, nil)
 }
 
 func QueryEncode(params map[string]string) string {
