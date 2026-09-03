@@ -279,13 +279,15 @@ var domainCheckCmd = &cobra.Command{
 		}
 
 		var result struct {
-			Valid  bool `json:"valid"`
-			MX     struct {
+			Records struct {
 				Valid bool `json:"valid"`
-			} `json:"mx"`
-			SPF struct {
-				Valid bool `json:"valid"`
-			} `json:"spf"`
+				MX    struct {
+					Valid bool `json:"valid"`
+				} `json:"mx"`
+				SPF struct {
+					Valid bool `json:"valid"`
+				} `json:"spf"`
+			} `json:"records"`
 		}
 		if err := json.Unmarshal(resp, &result); err != nil {
 			output.Error(err.Error())
@@ -300,9 +302,9 @@ var domainCheckCmd = &cobra.Command{
 		}
 
 		fmt.Printf("Domain: %s\n", domain)
-		fmt.Printf("MX:     %s\n", check(result.MX.Valid))
-		fmt.Printf("SPF:    %s\n", check(result.SPF.Valid))
-		fmt.Printf("Overall: %s\n", check(result.Valid))
+		fmt.Printf("MX:     %s\n", check(result.Records.MX.Valid))
+		fmt.Printf("SPF:    %s\n", check(result.Records.SPF.Valid))
+		fmt.Printf("Overall: %s\n", check(result.Records.Valid))
 	},
 }
 
