@@ -59,10 +59,8 @@ func (c *Client) doRequest(method, reqURL string, body interface{}) ([]byte, err
 
 	if resp.StatusCode >= 400 {
 		var apiErr struct {
-			Error   string              `json:"error"`
-			Message string              `json:"message"`
-			Errors  map[string][]string `json:"errors"`
-			Success bool                `json:"success"`
+			Error   string `json:"error"`
+			Message string `json:"message"`
 		}
 		if json.Unmarshal(respBody, &apiErr) == nil {
 			// v3 reports the failure in `error`, v4 in `message`.
