@@ -240,6 +240,40 @@ var domainAddCmd = &cobra.Command{
 	},
 }
 
+var domainUpdateCmd = &cobra.Command{
+	Use:   "update <domain>",
+	Short: "Update a domain's settings",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := api.NewClient(config.GetAPIKey())
+		domain := args[0]
+
+		body := map[string]interface{}{}
+
+		if routingEngine, _ := cmd.Flags().GetString("routing-engine"); routingEngine != "" {
+			body["routing_engine"] = routingEngine
+		}
+
+		if len(body) == 0 {
+			output.Error("Nothing to update. Use --routing-engine alias|rules.")
+			os.Exit(1)
+		}
+
+		resp, err := client.Put("/domains/"+domain, body)
+		if err != nil {
+			output.Error(err.Error())
+			os.Exit(1)
+		}
+
+		if output.JSONOutput {
+			fmt.Println(string(resp))
+			return
+		}
+
+		output.Success(fmt.Sprintf("Domain %s updated", domain))
+	},
+}
+
 var domainDeleteCmd = &cobra.Command{
 	Use:   "delete <domain>",
 	Short: "Delete a domain",
@@ -313,6 +347,7 @@ func init() {
 	domainCmd.AddCommand(domainListCmd)
 	domainCmd.AddCommand(domainGetCmd)
 	domainCmd.AddCommand(domainAddCmd)
+	domainCmd.AddCommand(domainUpdateCmd)
 	domainCmd.AddCommand(domainDeleteCmd)
 	domainCmd.AddCommand(domainCheckCmd)
 
@@ -321,4 +356,5 @@ func init() {
 	domainListCmd.Flags().Int("limit", 0, "Results per page")
 	domainAddCmd.Flags().String("notification-email", "", "Notification email address")
 	domainAddCmd.Flags().String("whitelabel", "", "Whitelabel domain")
+	domainUpdateCmd.Flags().String("routing-engine", "", "Routing engine: alias or rules")
 }
