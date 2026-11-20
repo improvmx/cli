@@ -38,6 +38,7 @@ export IMPROVMX_API_KEY=your-api-key
 improvmx domain list                  # List all domains
 improvmx domain add example.com       # Add a domain
 improvmx domain get example.com       # Get domain details
+improvmx domain update example.com --routing-engine rules  # Switch to rules routing
 improvmx domain check example.com     # Check DNS configuration
 improvmx domain delete example.com    # Delete a domain
 ```
